@@ -8,11 +8,26 @@ import org.junit.jupiter.api.Test;
 class PetLifecycleRunner {
 
     @Test
-    void testPetLifecycle() {
+    void testSmoke() {
         Results results = Runner.path("classpath:features/pet")
-                // parallel(N) es seguro porque cada escenario crea su propio pet
-                // via create-pet.feature (UUID único por llamada, sin estado compartido)
+                .tags("@smoke")
+                .parallel(1);
+        assertEquals(0, results.getFailCount(), results.getErrorMessages());
+    }
+
+    @Test
+    void testFullLifecycle() {
+        Results results = Runner.path("classpath:features/pet")
+                .tags("@lifecycle", "~@ignore")
                 .parallel(5);
+        assertEquals(0, results.getFailCount(), results.getErrorMessages());
+    }
+
+    @Test
+    void testNegative() {
+        Results results = Runner.path("classpath:features/pet/pet-negative.feature")
+                .tags("@negative")
+                .parallel(2);
         assertEquals(0, results.getFailCount(), results.getErrorMessages());
     }
 }
