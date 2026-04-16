@@ -6,17 +6,20 @@ Suite de pruebas automatizadas de API usando **Karate DSL** sobre **Maven**, que
 
 ## Estructura del Proyecto
 
-```
+```text
 src/test/java/
 ├── karate-config.js                        # URL base y configuración global
 ├── data/
-│   └── valid-pet-data.json                 # Datos de prueba reutilizables
+│   ├── create-pet-request.json             # Payload para creación de mascota
+│   └── update-pet-request.json             # Payload para actualización de mascota
 ├── features/
 │   ├── setup/
 │   │   └── create-pet.feature              # Setup reutilizable: crea un pet único
-│   └── pet/
-│       └── pet-lifecycle.feature           # Escenarios del ciclo de vida
-│   └── PetLifecycleRunner.java             # Runner JUnit5 con parallel(5)
+│   ├── pet/
+│   │   ├── pet-lifecycle.feature           # Escenarios del ciclo de vida y búqueda de mascotas
+│   │   └── pet-negative.feature            # Funcionalidades negativas (404, 400/500, etc.)
+│   └── PetLifecycleRunner.java             # Runner JUnit5 con suites separadas
+```
 
 
 ---
@@ -32,12 +35,17 @@ src/test/java/
 ## Ejecución
 
 ```bash
-# Todos los tests
+# Ejecutar TODO el entorno de pruebas
 mvn test
 
-# Solo el lifecycle
-mvn test -Dtest=PetLifecycleRunner
+# Ejecutar solo escenarios Smoke
+mvn test -Dtest=PetLifecycleRunner#testSmoke
 
+# Ejecutar el ciclo de vida de mascotas por estados específicos
+mvn test -Dtest=PetLifecycleRunner#testFullLifecycle
+
+# Ejecutar validaciones negativas
+mvn test -Dtest=PetLifecycleRunner#testNegative
 ```
 
 ---
@@ -102,17 +110,18 @@ Esto permite confirmar de un vistazo que el pet se creó, que el ID es correcto 
 2. La API responde con el pet creado → se extrae `petId`
 3. `GET /pet/{petId}` → valida estructura y que `id` coincide
 
-### @update — Actualizar estado a "sold"
+### @update y @search (Scenario Outline) — Ciclo interactivo parametrizado
 
-1. `create-pet.feature` crea un pet propio (distinto al de @smoke)
-2. `PUT /pet` con `status: sold`
-3. Valida que la respuesta confirma `id`, `name` y `status: sold`
+Utilizamos tablas de ejemplos (Examples) para validar que el ciclo de vida cubre los diferentes escenarios base de manera iterativa y sin repetir código (Principio DRY):
 
-### @search — Buscar mascotas por status
+1. **`@update`:** Se crean y actualizan mascotas con el estado (`available`, `pending` y `sold`), validando la recepción satisfactoria de la data.
+2. **`@search`:** Validamos en el sistema que el conteo en `GET /pet/findByStatus` devuelve la estructura esperada (`match each`) y que los resultados son mayores a 0 con el assert length correspondientes a su estado.
 
-1. `GET /pet/findByStatus?status=sold`
-2. `match each response` valida que todos los elementos tengan `status: sold`
-3. No requiere setup: el endpoint de búsqueda no muta estado
+### @negative — Casos de prueba negativos (pet-negative.feature)
+
+1. `GET /pet/{invalid_id}` y valida correctamente que sea un `404 Not Found`.
+2. `PUT /pet` simulando campos inválidos que el backend repela con un error `400` o `500`.
+3. `GET /pet/findByStatus?status={invalid_status}` simulando búsquedas corruptas comprobando respuesta `400` o listas `[]`.
 
 ---
 
@@ -163,12 +172,14 @@ var config = {
 }
 ```
 
-**`valid-pet-data.json`** — datos base y de actualización separados:
+**`create-pet-request.json` y `update-pet-request.json`** — datos base granularizados y segregados para cumplir el Principio de Responsabilidad Única.
 
 ```json
 {
-  "base":   { "photoUrls": [...], "category": {...}, "tags": [...], "status": "available" },
-  "update": { "photoUrls": [...], "category": {...}, "tags": [...], "status": "sold" }
+  "photoUrls": ["https://example.com/photo1.jpg"],
+  "category": { "id": 1, "name": "Dogs" },
+  "tags": [{ "id": 1, "name": "friendly" }],
+  "status": "available"
 }
 ```
 
@@ -180,6 +191,6 @@ var config = {
 mvn clean test -B
 ```
 
-`parallel(5)` en el Runner es seguro porque cada escenario crea su propio pet con UUID + randomId únicos.
+Runner seguro utilizando las etiquetas y `@tag` separados previniendo acoplamientos y controlando los threads (parallel).
 
 
