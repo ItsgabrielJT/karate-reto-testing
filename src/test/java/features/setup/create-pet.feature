@@ -4,7 +4,7 @@ Feature: Setup – Crear mascota reutilizable
     * url apiUrl
 
   Scenario: Crear mascota y exponer petId y petName al llamador
-    * def petData = read('classpath:data/valid-pet-data.json')
+    * def petData = read('classpath:data/create-pet-request.json')
     * def uid     = java.util.UUID.randomUUID() + ''
     * def petName = 'pet-' + uid.substring(0, 8)
     * def randomId = Math.floor(Math.random() * 2000000000) + 1000000
@@ -15,9 +15,9 @@ Feature: Setup – Crear mascota reutilizable
       {
         "id": #(randomId),
         "name": "#(petName)",
-        "photoUrls": #(petData.base.photoUrls),
-        "category":  #(petData.base.category),
-        "tags":      #(petData.base.tags),
+        "photoUrls": #(petData.photoUrls),
+        "category":  #(petData.category),
+        "tags":      #(petData.tags),
         "status":    "available"
       }
       """
