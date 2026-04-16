@@ -35,17 +35,17 @@ src/test/java/
 ## Ejecución
 
 ```bash
-# Ejecutar TODO el entorno de pruebas
+# Ejecutar TODO el entorno de pruebas (Reporte consolidado)
 mvn test
 
-# Ejecutar solo escenarios Smoke
-mvn test -Dtest=PetLifecycleRunner#testSmoke
+# Ejecutar solo escenarios Smoke (Filtro nativo de Karate)
+mvn test -Dkarate.options="--tags @smoke"
 
 # Ejecutar el ciclo de vida de mascotas por estados específicos
-mvn test -Dtest=PetLifecycleRunner#testFullLifecycle
+mvn test -Dkarate.options="--tags @lifecycle"
 
 # Ejecutar validaciones negativas
-mvn test -Dtest=PetLifecycleRunner#testNegative
+mvn test -Dkarate.options="--tags @negative"
 ```
 
 ---
