@@ -1,0 +1,6 @@
+{
+  "photoUrls": ["https://example.com/photo1.jpg"],
+  "category": { "id": 1, "name": "Dogs" },
+  "tags": [{ "id": 1, "name": "friendly" }],
+  "status": "available"
+}
