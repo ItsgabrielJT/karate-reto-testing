@@ -152,7 +152,7 @@ Los `##` (doble almohadilla) indican campo opcional — usado para campos que el
 ## Reporte HTML
 
 ```bash
-open target/karate-reports/features.pet.pet-lifecycle.html
+open target/karate-reports/karate-summary.html
 ```
 
 En el reporte se puede:
