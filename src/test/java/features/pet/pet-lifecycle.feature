@@ -12,6 +12,8 @@ Feature: Ciclo de vida completo de mascota – PetStore
     * print '>>> [smoke] petId a consultar:', petId
 
     Given path 'pet', petId
+    * configure retry = { count: 3, interval: 3000 }
+    And retry until responseStatus == 200
     When method get
     Then status 200
     * print '>>> [smoke] GET /pet/' + petId + ' RESPONSE → id:', response.id, '| name:', response.name, '| status:', response.status
@@ -71,6 +73,8 @@ Feature: Ciclo de vida completo de mascota – PetStore
 
     Given path 'pet', 'findByStatus'
     And param status = '<searchStatus>'
+    * configure retry = { count: 3, interval: 3000 }
+    And retry until responseStatus == 200
     When method get
     Then status 200
     * print '>>> [search] GET /findByStatus?status=' + '<searchStatus>' + ' → total registros:', response.length
@@ -92,5 +96,6 @@ Feature: Ciclo de vida completo de mascota – PetStore
 
     Examples:
       | searchStatus |
+      | available    |
       | pending      |
       | sold         |
