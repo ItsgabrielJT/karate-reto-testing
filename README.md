@@ -24,11 +24,19 @@ src/test/java/
 
 ---
 
-## Requisitos
+## 1. Prerequisitos:
+** Aquí describiremos las versiones de las dependencias, packages u otra tecnología que necesito tener configurado en mi maquina local.
 
-- Java 17+
-- Maven 3.9+
+- Maquina local con el sistema operativo macOS, Windows o Linux
+- IDE VS Code, IntelliJ IDEA o Eclipse
+- Maven version 3.9+ (debe estar en la variable de entorno)
+- JDK versión 17+ (debe estar en la variable de entorno)
 - Acceso a `https://petstore.swagger.io/v2`
+
+## 2. Comandos de instalación
+** Aquí describiremos los comandos básicos que se necesita ejecutar para tener todas las dependencias instaladas en mi máquina local
+
+- `mvn clean install -DskipTests` (descarga y actualiza todas las dependencias definidas en el archivo POM)
 
 ---
 
