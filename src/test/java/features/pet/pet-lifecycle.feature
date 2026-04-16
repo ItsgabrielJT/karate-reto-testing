@@ -2,7 +2,7 @@ Feature: Ciclo de vida completo de mascota – PetStore
 
   Background:
     * url apiUrl
-    * def petData = read('classpath:data/valid-pet-data.json')
+    * def updateData = read('classpath:data/update-pet-request.json')
 
   @smoke @lifecycle
   Scenario: Obtener mascota recién creada por ID
@@ -31,22 +31,22 @@ Feature: Ciclo de vida completo de mascota – PetStore
     And match response.status == '#string'
 
   @update @lifecycle
-  Scenario: Actualizar estado de mascota a "sold"
+  Scenario Outline: Actualizar estado de mascota a "<targetStatus>"
 
     * def created = call read('classpath:features/setup/create-pet.feature')
     * def petId   = created.petId
     * def petName = created.petName
-    * print '>>> [update] petId a actualizar:', petId, '| petName:', petName
+    * print '>>> [update] petId a actualizar:', petId, '| petName:', petName, '| targetStatus:', '<targetStatus>'
 
     * def updateRequest =
       """
       {
         "id":        #(petId),
         "name":      "#(petName)",
-        "photoUrls": #(petData.update.photoUrls),
-        "category":  #(petData.update.category),
-        "tags":      #(petData.update.tags),
-        "status":    "sold"
+        "photoUrls": #(updateData.photoUrls),
+        "category":  #(updateData.category),
+        "tags":      #(updateData.tags),
+        "status":    "<targetStatus>"
       }
       """
 
@@ -57,26 +57,40 @@ Feature: Ciclo de vida completo de mascota – PetStore
 
     And match response.id     == petId
     And match response.name   == petName
-    And match response.status == 'sold'
+    And match response.status == '<targetStatus>'
     * print '>>> [update] PUT /pet RESPONSE → id:', response.id, '| name:', response.name, '| status:', response.status
 
+    Examples:
+      | targetStatus |
+      | available    |
+      | pending      |
+      | sold         |
+
   @search @lifecycle
-  Scenario: Buscar mascotas por status "sold"
+  Scenario Outline: Buscar mascotas por status "<searchStatus>"
 
     Given path 'pet', 'findByStatus'
-    And param status = 'sold'
+    And param status = '<searchStatus>'
     When method get
     Then status 200
-    * print '>>> [search] GET /findByStatus?status=sold → total registros:', response.length
+    * print '>>> [search] GET /findByStatus?status=' + '<searchStatus>' + ' → total registros:', response.length
+    
+    # Validamos que el conteo sea mayor a 0
+    * assert response.length > 0
 
     And match each response ==
       """
       {
         "id":        "#number",
         "name":      "##string",
-        "status":    "sold",
+        "status":    "<searchStatus>",
         "photoUrls": "##[]",
         "category":  "##object",
         "tags":      "##[]"
       }
       """
+
+    Examples:
+      | searchStatus |
+      | pending      |
+      | sold         |
