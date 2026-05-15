@@ -13,7 +13,7 @@ function fn() {
   
   var config = {
     env: env,
-    apiUrl: 'https://petstore.swagger.io/v2'
+    apiUrl: 'https://api.demoblaze.com'
   }
   return config;
 }
